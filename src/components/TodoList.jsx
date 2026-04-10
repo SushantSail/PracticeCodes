@@ -1,50 +1,77 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 
-export const TodoList = () => {
-    const[taskList , setTaskList] = useState([]);
-    const[input , setInput]= useState('');
+const ToDo = () => {
+  const [taskList, setTaskList] = useState([]);
+  const [inputTask, setInputTask] = useState("");
 
-    function handleSubmit(e){
-        e.preventDefault();
-        const task = {
-            id: new Date().getTime,
-            name: input,
-        }
-        setTaskList([...taskList,task])
-        setInput('')
+    // ✅ HANDLE SUBMIT
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (inputTask.trim() === '') return;
+    console.log("Submitted Value:", inputTask);
+
+    const newTask = {
+      id: new Date().getTime(),
+      taskName: inputTask,
+      isCompleted: false,
     }
+    setTaskList([...taskList, newTask])
+    // setTaskList((prev) => [...prev, newTask]);   Both line Works.
+    console.log(taskList)
+    setInputTask('')
+  }
 
-    function handleReset(){
-        setTaskList([]);
-    }
+  // ✅ HANDLE DELETE
+  function handleDelete(idToDelete) {
+    const updatedList = taskList.filter((task) => task.id !== idToDelete);
+    setTaskList(updatedList);
+  }
 
-    return (
-        <>
-        <div>TASK LIST</div>  
+  // ✅ HANDLE RESET
+  function handleReset() {
+    setTaskList([]);
+  }
 
-        <form onSubmit={handleSubmit}>
-            <input type="text" 
-            value={input}
-            onChange={(e) => {setInput(e.target.value)}}/>
-            <button type='submit'>ADD</button>
-            <button type='button' onClick={handleReset}>Reset</button>
-        </form>
+    // ✅ HANDLE Completion Status
+  function handleEdit(idToEdit) {
+    const updatedList = taskList.map((task) => {
+      if (task.id === idToEdit) {
+        return { ...task, isCompleted: !task.isCompleted };
+      }
+      return task;
+    });
+    setTaskList(updatedList);
+    
+  }
 
+  return (
+    <div>
+      <h2>To Do App</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Enter Task"
+          value={inputTask}
+          onChange={(e) => setInputTask(e.target.value)}
+        />
+        <button type="submit">Add</button>
+        <button type="button" onClick={handleReset}>Reset</button>
+      </form>
 
-        <div>
-            <div>Show task</div>
-            <div>
-                <ul>
-                    {
-                        taskList.map((task)=>(
-                        <li key={task.id}>{task.name}</li>
-                        ) )
-                    }
-                </ul>
-            </div>
-        </div>
-        </>
-    );
-}
+      {
+        taskList.map((item) => (
+          <li key={item.id}>
+            <span style={{textDecoration : item.isCompleted ? 'line-through':'none'}}> 
+              {item.taskName} 
+              </span>
+            <button type="button"onClick={() => handleDelete(item.id)}>Delete</button>
+            <input type="checkbox" checked={item.isCompleted} 
+            onChange={() => handleEdit(item.id)}/>
+          </li>
+        ))
+      }
+    </div>
+  );
+};
 
-
+export default ToDo;
