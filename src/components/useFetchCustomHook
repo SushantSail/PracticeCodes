@@ -1,0 +1,64 @@
+// useFetch.js
+import React,{useState, useEffect} from "react";
+
+export default function useFetch(URL){
+  const [data , setData] = useState([]);
+  const [loading ,setLoading] = useState(false);
+  const [error ,setError] = useState(null);
+
+async function getData(){
+  setLoading(true);
+  try{
+    const res = await fetch(URL);
+
+     if (!res.ok) {
+      throw new Error(`Error ${res.status}: ${res.statusText}`);
+    }
+    const result = await res.json();
+    setData(result)
+  }catch(err){
+    console.log(err);
+    setError(err.message); 
+  }
+  finally{
+    setLoading(false)
+  }
+}
+  return {data , loading,error ,getData};
+} 
+------------------------------------------------------------------------------------------------------------------------------------------
+// app.js
+import React, { useState } from "react";
+import "./style.css";
+import useFetch from './useFetch';
+
+export default function App() {
+
+  const { data, loading, error, getData } = useFetch('https://jsonplaceholder.typicode.com/users');
+
+  return (
+    <div>
+      <div>
+        <h4>Get List of All Users </h4>
+        <button onClick={() => getData()}>Get Data</button>
+        <hr />
+      </div>
+
+      {loading ?
+        (<li>Loading.....</li>) :
+        (<ul>
+          {
+            data?.map((item) => (
+              <li key={item.id}>{item.name}</li>
+            ))
+          }
+        </ul>)
+      }
+      {
+        error && <li style={{ color: "red" }}>Sorry Something went wrong.</li>
+      }
+
+    </div>
+  );
+}
+
